@@ -30,6 +30,10 @@
   [Kane Cheshire](https://github.com/kanecheshire)
   [#3624](https://github.com/realm/SwiftLint/issues/3624)
 
+* Read `excluded` setting in `implicitly_unwrapped_optional` rule configuration to
+  be able to exclude certain filenames (like Test classes).
+  [Mirek Petricek](https://github.com/mirekp)
+
 #### Bug Fixes
 
 * Fix false positives in `empty_enum_arguments` rule when comparing values

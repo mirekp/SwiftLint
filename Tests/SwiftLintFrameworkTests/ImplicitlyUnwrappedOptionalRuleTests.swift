@@ -1,6 +1,10 @@
 @testable import SwiftLintFramework
 import XCTest
 
+private let fixturesDirectory = #file.bridge()
+    .deletingLastPathComponent.bridge()
+    .appendingPathComponent("Resources/ImplicitlyUnwrappedOptionalRuleFixtures")
+
 class ImplicitlyUnwrappedOptionalRuleTests: XCTestCase {
     func testWithDefaultConfiguration() {
         verifyRule(ImplicitlyUnwrappedOptionalRule.description)
@@ -26,5 +30,26 @@ class ImplicitlyUnwrappedOptionalRuleTests: XCTestCase {
 
         verifyRule(description, ruleConfiguration: ["mode": "all"],
                    commentDoesntViolate: true, stringDoesntViolate: true)
+    }
+
+    func testExcludedFileNameDoesntTrigger() {
+        XCTAssert(try validate(fileName: "ImplicitlyUnwrappedTest.swift", excludedOverride: ["excluded": ".*Test.swift"]
+        ).isEmpty)
+    }
+
+    func testNonexcludedFileNameDoesTrigger() {
+        XCTAssertEqual(try validate(fileName: "ImplicitlyUnwrappedTest.swift", excludedOverride: ["excluded": ""]).count, 1)
+    }
+
+    private func validate(fileName: String, excludedOverride: [String: Any]? = nil) throws -> [StyleViolation] {
+        let file = SwiftLintFile(path: fixturesDirectory.stringByAppendingPathComponent(fileName))!
+        let rule: ImplicitlyUnwrappedOptionalRule
+        if let excluded = excludedOverride {
+            rule = try ImplicitlyUnwrappedOptionalRule(configuration: excluded)
+        } else {
+            rule = ImplicitlyUnwrappedOptionalRule()
+        }
+
+        return rule.validate(file: file)
     }
 }

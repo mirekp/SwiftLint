@@ -1,3 +1,5 @@
+import Foundation
+
 // swiftlint:disable:next type_name
 public enum ImplicitlyUnwrappedOptionalModeConfiguration: String {
     case all = "all"
@@ -16,10 +18,12 @@ public enum ImplicitlyUnwrappedOptionalModeConfiguration: String {
 public struct ImplicitlyUnwrappedOptionalConfiguration: RuleConfiguration, Equatable {
     private(set) var severity: SeverityConfiguration
     private(set) var mode: ImplicitlyUnwrappedOptionalModeConfiguration
+    private(set) var excluded: Set<NSRegularExpression>
 
-    init(mode: ImplicitlyUnwrappedOptionalModeConfiguration, severity: SeverityConfiguration) {
+    init(mode: ImplicitlyUnwrappedOptionalModeConfiguration, severity: SeverityConfiguration, excluded: [String] = []) {
         self.mode = mode
         self.severity = severity
+        self.excluded = Set(excluded.compactMap { try? NSRegularExpression(pattern: $0, options: .caseInsensitive) })
     }
 
     public var consoleDescription: String {
@@ -38,6 +42,10 @@ public struct ImplicitlyUnwrappedOptionalConfiguration: RuleConfiguration, Equat
 
         if let severityString = configuration["severity"] as? String {
             try severity.apply(configuration: severityString)
+        }
+
+        if let excluded = [String].array(of: configuration["excluded"]) {
+            self.excluded = Set(excluded.compactMap { try? NSRegularExpression(pattern: $0, options: .caseInsensitive) })
         }
     }
 }

@@ -45,6 +45,16 @@ public struct ImplicitlyUnwrappedOptionalRule: ASTRule, ConfigurationProviderRul
             return []
         }
 
+        if let filePath = file.path,
+           case let fileName = filePath.bridge().lastPathComponent {
+            for pattern in configuration.excluded {
+                let range = NSRange(location: 0, length: fileName.utf16.count)
+                if pattern.firstMatch(in: fileName, options: [], range: range) != nil {
+                    return []
+                }
+            }
+        }
+
         guard let typeName = dictionary.typeName  else { return [] }
         guard hasImplicitlyUnwrappedOptional(typeName) else { return [] }
 
